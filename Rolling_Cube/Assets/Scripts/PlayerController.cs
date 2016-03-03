@@ -13,9 +13,26 @@ public class PlayerController : MonoBehaviour
 
     public RaycastHit[] blackBoxList = new RaycastHit[4];
 
+    float inputVertical, inputHorizontal;
+
 
     void Update()
     {
+        inputVertical = Input.GetAxis("Vertical");
+        inputHorizontal = Input.GetAxis("Horizontal");
+
+        //print(inputVertical + "Vertical");
+        //print(inputHorizontal + "Horizontal");
+
+        var upSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.up);
+        var downSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.up);
+        var rightSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.right);
+        var leftSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.right);        
+        var forwardSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.forward);
+        var backwardSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.forward);
+
+        //print(leftSpeed);
+
         isGrounded = false;
 
         Ray groundCheckNW = new Ray(transform.TransformPoint(-.5f, 0, .5f), -transform.up);
@@ -36,23 +53,23 @@ public class PlayerController : MonoBehaviour
                 isGrounded = true;
         }
 
-        foreach (RaycastHit r in blackBoxList)
-            print(r.collider);
+        //foreach (RaycastHit r in blackBoxList)
+        //    print(r.collider);
 
-        print(isGrounded);
+        //print(isGrounded);
 
         if (Input.GetButtonDown("Jump") && isGrounded == true)
         {
             rbodyToMove.AddForce(transform.up * jumpPowerUp, ForceMode.Impulse);
 
-            if (Input.GetAxis("Vertical") > 0)
-                rbodyToMove.AddForce(transform.forward * jumpPowerFoward, ForceMode.Impulse);
-            if (Input.GetAxis("Vertical") < 0)
-                rbodyToMove.AddForce(-transform.forward * jumpPowerBack, ForceMode.Impulse);
-            if (Input.GetAxis("Horizontal") > 0)
-                rbodyToMove.AddForce(transform.right * jumpPowerLeftRight, ForceMode.Impulse);
-            if (Input.GetAxis("Horizontal") < 0)
-                rbodyToMove.AddForce(-transform.right * jumpPowerLeftRight, ForceMode.Impulse);
+            if (inputVertical > 0)
+                rbodyToMove.AddForce(transform.forward * inputVertical * jumpPowerFoward, ForceMode.Impulse);
+            if (inputVertical < 0)
+                rbodyToMove.AddForce(transform.forward * inputVertical * jumpPowerBack, ForceMode.Impulse);
+            if (inputHorizontal > 0)
+                rbodyToMove.AddForce(transform.right * inputHorizontal * jumpPowerLeftRight, ForceMode.Impulse);
+            if (inputHorizontal < 0)
+                rbodyToMove.AddForce(transform.right * inputHorizontal * jumpPowerLeftRight, ForceMode.Impulse);
 
         }
     }

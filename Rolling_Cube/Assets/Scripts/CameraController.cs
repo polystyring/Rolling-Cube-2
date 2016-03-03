@@ -3,12 +3,14 @@ using System.Collections;
 
 public class CameraController : MonoBehaviour
 {
+    public Camera cameraMain;
     public Rigidbody rbodyToFollow;
-    public Transform transformToFollow, transformToLookAt, transformDefaultLook;
+    public Transform playerCubeTransform, transformToFollow, transformToLookAt, transformDefaultLook;
     private Vector3 cameraPositionTarget, positionVelocity = Vector3.zero, lookVelocity = Vector3.zero;
+    private Vector3 screenPoint;
     public float smoothMove, smoothLook;
     private float inputVertical, inputHorizontal;
-
+    bool isGrounded;
 
     void Start()
     {
@@ -17,6 +19,19 @@ public class CameraController : MonoBehaviour
 
     void FixedUpdate()
     {
+        isGrounded = rbodyToFollow.GetComponent<PlayerController>().isGrounded;
+
+        screenPoint = cameraMain.WorldToViewportPoint(playerCubeTransform.position);
+        if (screenPoint.x > .8f)
+            print("right");
+        if (screenPoint.x < .2f)
+            print("left");
+        if (screenPoint.y > .8f)
+            print("top");
+        if (screenPoint.y < .2f)
+            print("bottom");
+
+
 
         cameraPositionTarget = transformToFollow.position;
         transform.position = Vector3.SmoothDamp(transform.position, cameraPositionTarget, ref positionVelocity, smoothMove);
@@ -50,7 +65,7 @@ public class CameraController : MonoBehaviour
 
 
 
-        if (upSpeed > 0)
+        if (upSpeed > 0 && !isGrounded)
         {
             transformToLookAt.Translate(-Vector3.up * upSpeed * .015f);
             transformToLookAt.Translate(-Vector3.forward * upSpeed * .01f);
