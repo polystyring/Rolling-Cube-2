@@ -66,12 +66,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\CamerLookTarget.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
+    <Compile Include="Assets\Scripts\CheckpointManager.cs" />
+    <Compile Include="Assets\Scripts\CheckpointTicker.cs" />
     <Compile Include="Assets\Scripts\CubeBlendTreeController.cs" />
+    <Compile Include="Assets\Scripts\GUITextController.cs" />
+    <Compile Include="Assets\Scripts\LoadingScreen\CubeRotator.cs" />
+    <Compile Include="Assets\Scripts\LoadingScreen\LoadingScreenController.cs" />
+    <Compile Include="Assets\Scripts\LoadingScreen\TextController.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Roller.cs" />
     <Compile Include="Assets\Scripts\Rotator.cs" />
+    <Compile Include="Assets\Scripts\SpawnController.cs" />
+    <Compile Include="Assets\Scripts\UniversalRotator.cs" />
+    <Compile Include="Assets\Scripts\canJumpPowerup.cs" />
+    <Compile Include="Assets\Scripts\canSlidePowerup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Standard Assets\Characters\ThirdPersonCharacter\ThirdPersonCharacterGuidelines.txt" />

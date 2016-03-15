@@ -9,27 +9,48 @@ public class CameraController : MonoBehaviour
     private Vector3 cameraPositionTarget, positionVelocity = Vector3.zero, lookVelocity = Vector3.zero;
     private Vector3 screenPoint;
     public float smoothMove, smoothLook;
+    private float defaultSmoothMove, defaultSmoothLook;
     private float inputVertical, inputHorizontal;
-    bool isGrounded;
+    bool isGrounded, isTwisting, isSliding;
+
+    PlayerController playerController;
 
     void Start()
     {
         transformToLookAt.position = transformDefaultLook.position;
+        playerController = rbodyToFollow.GetComponent<PlayerController>();
+
+        defaultSmoothMove = smoothMove;
+        defaultSmoothLook = smoothLook;
     }
 
     void FixedUpdate()
     {
-        isGrounded = rbodyToFollow.GetComponent<PlayerController>().isGrounded;
+        isGrounded = playerController.isGrounded;
 
-        screenPoint = cameraMain.WorldToViewportPoint(playerCubeTransform.position);
-        if (screenPoint.x > .8f)
-            print("right");
-        if (screenPoint.x < .2f)
-            print("left");
-        if (screenPoint.y > .8f)
-            print("top");
-        if (screenPoint.y < .2f)
-            print("bottom");
+        isTwisting = playerController.isTwisting;
+        isSliding = playerController.isSliding;
+        if (isTwisting)
+            smoothMove = .05f;
+        else if (isSliding)
+            smoothMove = .1f;
+        else
+            smoothMove = defaultSmoothMove;
+
+
+
+        //print(smoothMove);
+
+
+        //screenPoint = cameraMain.WorldToViewportPoint(playerCubeTransform.position);
+        //if (screenPoint.x > .8f)
+        //    print("right");
+        //if (screenPoint.x < .2f)
+        //    print("left");
+        //if (screenPoint.y > .8f)
+        //    print("top");
+        //if (screenPoint.y < .2f)
+        //    print("bottom");
 
 
 
@@ -63,13 +84,11 @@ public class CameraController : MonoBehaviour
         //print(Input.GetAxis("Vertical"));
 
 
-
-
-        if (upSpeed > 0 && !isGrounded)
-        {
-            transformToLookAt.Translate(-Vector3.up * upSpeed * .015f);
-            transformToLookAt.Translate(-Vector3.forward * upSpeed * .01f);
-        }
+        //if (upSpeed > 0 && !isGrounded)
+        //{
+        //    transformToLookAt.Translate(-Vector3.up * upSpeed * .015f);
+        //    transformToLookAt.Translate(-Vector3.forward * upSpeed * .01f);
+        //}
 
 
 

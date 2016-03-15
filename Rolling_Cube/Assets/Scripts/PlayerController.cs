@@ -7,13 +7,37 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rbodyToMove;
 
     public float speed, rotationSpeed;
+    private float defaultSpeed, defaultRotationSped, fallingSpeed, fallTimer;
     public float jumpPowerUp, jumpPowerFoward, jumpPowerBack, jumpPowerLeftRight;
     public float jumpMoveSpeed, jumpMoveTurn;
-    public bool isGrounded;
+    public bool isGrounded, isJumping;
+    public bool canJump, canTwist, canSlide;   
 
     public RaycastHit[] blackBoxList = new RaycastHit[4];
 
     float inputVertical, inputHorizontal;
+
+    float scaledSpeed, inverseSpeed;
+    public bool isTwisting = false;
+    float twistTime;
+    public float twistSpeed;
+
+    public float slideSpeed;
+    public bool isSliding = false;
+    float slideTime;
+
+
+
+    void Start()
+    {
+        defaultSpeed = speed;
+        defaultRotationSped = rotationSpeed;
+
+        //canJump = false;
+        //canTwist = false;
+        //canSlide = false;
+    }
+
 
 
     void Update()
@@ -24,12 +48,12 @@ public class PlayerController : MonoBehaviour
         //print(inputVertical + "Vertical");
         //print(inputHorizontal + "Horizontal");
 
-        var upSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.up);
-        var downSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.up);
-        var rightSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.right);
-        var leftSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.right);        
-        var forwardSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.forward);
-        var backwardSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.forward);
+        //        var upSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.up);
+        //        var downSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.up);
+        //        var rightSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.right);
+        //        var leftSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.right);
+        //        var forwardSpeed = Vector3.Dot(rbodyToMove.velocity, rbodyToMove.transform.forward);
+        //        var backwardSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.forward);
 
         //print(leftSpeed);
 
@@ -49,8 +73,12 @@ public class PlayerController : MonoBehaviour
 
         for (int i = 0; i < blackBoxList.Length && isGrounded == false; i++)
         {
-            if (blackBoxList[i].collider != null)
+            if (blackBoxList[i].collider != null && blackBoxList[i].collider.gameObject.layer != 8)
+            {
                 isGrounded = true;
+                fallingSpeed = 0;
+                fallTimer = 0;
+            }
         }
 
         //foreach (RaycastHit r in blackBoxList)
@@ -58,8 +86,12 @@ public class PlayerController : MonoBehaviour
 
         //print(isGrounded);
 
-        if (Input.GetButtonDown("Jump") && isGrounded == true)
+        isJumping = false;
+
+        if (Input.GetButtonDown("Jump") && isGrounded && canJump)
         {
+            isJumping = true;
+
             rbodyToMove.AddForce(transform.up * jumpPowerUp, ForceMode.Impulse);
 
             if (inputVertical > 0)
@@ -70,10 +102,77 @@ public class PlayerController : MonoBehaviour
                 rbodyToMove.AddForce(transform.right * inputHorizontal * jumpPowerLeftRight, ForceMode.Impulse);
             if (inputHorizontal < 0)
                 rbodyToMove.AddForce(transform.right * inputHorizontal * jumpPowerLeftRight, ForceMode.Impulse);
-
         }
-    }
 
+        //print(rbodyToMove.velocity.magnitude);
+
+
+        if (Input.GetButtonDown("Left Bumper") && canTwist && !isTwisting && !isSliding)
+        {
+            scaledSpeed = rbodyToMove.velocity.magnitude / twistSpeed;
+            inverseSpeed = 1 - scaledSpeed;
+
+            rbodyToMove.velocity = Vector3.zero;
+            rbodyToMove.angularVelocity = Vector3.zero;
+            rbodyToMove.AddTorque(transform.up * -15, ForceMode.Impulse);
+
+            isTwisting = true;
+            twistTime = .5f;
+            rotationSpeed = 0;
+            speed = 0;
+        }
+
+        if (Input.GetButtonDown("Right Bumper") && canTwist && !isTwisting && !isSliding)
+        {
+            scaledSpeed = rbodyToMove.velocity.magnitude / twistSpeed;
+            inverseSpeed = 1 - scaledSpeed;
+
+            rbodyToMove.velocity = Vector3.zero;
+            rbodyToMove.angularVelocity = Vector3.zero;
+            rbodyToMove.AddTorque(transform.up * 15 * inverseSpeed, ForceMode.Impulse);
+
+            isTwisting = true;
+            twistTime = .5f;
+            rotationSpeed = 0;
+            speed = 0;
+        }
+
+        if (isTwisting == true)
+        {
+            twistTime -= Time.deltaTime;
+            if (twistTime <= 0)
+            {
+                isTwisting = false;
+                rotationSpeed = defaultRotationSped;
+                speed = defaultSpeed;
+            }
+        }
+
+
+        if (Input.GetButtonDown("Slide Left") && canSlide && !isSliding && !isTwisting)
+        {
+            rbodyToMove.AddForce(-transform.right * slideSpeed, ForceMode.Impulse);
+            rbodyToMove.angularVelocity = Vector3.zero;
+            isSliding = true;
+            slideTime = .25f;
+        }
+
+        if (Input.GetButtonDown("Slide Right") && canSlide && !isSliding && !isTwisting)
+        {
+            rbodyToMove.AddForce(transform.right * slideSpeed, ForceMode.Impulse);
+            rbodyToMove.angularVelocity = Vector3.zero;
+            isSliding = true;
+            slideTime = .25f;
+        }
+
+        if (isSliding == true)
+        {
+            slideTime -= Time.deltaTime;
+            if (slideTime <= 0)
+                isSliding = false;
+        }
+
+    }
 
 
     void FixedUpdate()
@@ -83,7 +182,7 @@ public class PlayerController : MonoBehaviour
 
         if (v != 0 || h != 0)
         {
-            if (isGrounded == true)
+            if (isGrounded)
             {
                 rbodyToMove.AddForce(rbodyToMove.transform.forward * v);
                 rbodyToMove.AddTorque(rbodyToMove.transform.up * h);
@@ -95,5 +194,25 @@ public class PlayerController : MonoBehaviour
             }
 
         }
+
+
+        float downSpeed = Vector3.Dot(rbodyToMove.velocity, -rbodyToMove.transform.up);
+        
+
+        if (!isGrounded && downSpeed > 0)
+        {
+            fallTimer += 1;
+
+            if (fallTimer > 3.5f)
+            {
+                //print(downSpeed);
+                fallingSpeed += 2.5f;
+                rbodyToMove.AddForce(-rbodyToMove.transform.up * fallingSpeed, ForceMode.Acceleration);
+            }
+        }
+            
+
+
+
     }
 }
